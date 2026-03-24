@@ -34,19 +34,13 @@ jobs:
         working-directory: loader
         run: call generate.bat
 
-      - name: Restore NuGet packages
-        shell: cmd
-        run: |
-          nuget restore build\umamusume-localify.sln
-          nuget restore loader\build\umamusume-localify-loader.sln
-
       - name: Build main project
         shell: cmd
-        run: msbuild build\umamusume-localify.sln /m /p:Configuration=Release /p:Platform=x64
+        run: msbuild build\umamusume-localify.slnx /restore /m /p:Configuration=Release /p:Platform=x64
 
       - name: Build loader project
         shell: cmd
-        run: msbuild loader\build\umamusume-localify-loader.sln /m /p:Configuration=Release /p:Platform=x64
+        run: msbuild loader\build\umamusume-localify-loader.slnx /restore /m /p:Configuration=Release /p:Platform=x64
 
       - name: Upload artifacts
         uses: actions/upload-artifact@v4
