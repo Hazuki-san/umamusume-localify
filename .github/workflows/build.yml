@@ -34,6 +34,10 @@ jobs:
         working-directory: loader
         run: call generate.bat
 
+      - name: Restore NuGet packages
+        shell: cmd
+        run: nuget restore build\packages.config -PackagesDirectory build\packages
+
       - name: Build main project
         shell: cmd
         run: msbuild build\umamusume-localify.slnx /restore /m /p:Configuration=Release /p:Platform=x64
