@@ -38,9 +38,17 @@ jobs:
         shell: cmd
         run: nuget restore build\packages.config -PackagesDirectory build\packages
 
+      - name: Resolve WebView2 NuGet root
+        shell: pwsh
+        run: |
+          $pkgs = Get-ChildItem -Path "build/packages" -Directory -Filter "Microsoft.Web.WebView2.*"
+          if (-not $pkgs) { throw "Microsoft.Web.WebView2 package directory not found under build/packages." }
+          if ($pkgs.Count -ne 1) { throw "Expected exactly one Microsoft.Web.WebView2 package directory under build/packages, found $($pkgs.Count)." }
+          "WEBVIEW2_NUGET_ROOT=$($pkgs[0].FullName)" | Out-File -FilePath $env:GITHUB_ENV -Encoding utf8 -Append
+
       - name: Build main project
         shell: cmd
-        run: msbuild build\umamusume-localify.slnx /restore /m /p:Configuration=Release /p:Platform=x64 /p:NugetRoot=%CD%\build\packages\Microsoft.Web.WebView2.1.0.3650.58
+        run: msbuild build\umamusume-localify.slnx /restore /m /p:Configuration=Release /p:Platform=x64 /p:NugetRoot=%WEBVIEW2_NUGET_ROOT%
 
       - name: Build loader project
         shell: cmd
