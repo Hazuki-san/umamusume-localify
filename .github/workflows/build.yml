@@ -1,0 +1,51 @@
+name: Build
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          submodules: recursive
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v2
+
+      - name: Generate project files
+        shell: cmd
+        run: |
+          call generate.bat
+          call loader\generate.bat
+
+      - name: Restore NuGet packages
+        shell: cmd
+        run: |
+          nuget restore build\umamusume-localify.sln
+          nuget restore loader\build\umamusume-localify-loader.sln
+
+      - name: Build main project
+        shell: cmd
+        run: msbuild build\umamusume-localify.sln /m /p:Configuration=Release /p:Platform=x64
+
+      - name: Build loader project
+        shell: cmd
+        run: msbuild loader\build\umamusume-localify-loader.sln /m /p:Configuration=Release /p:Platform=x64
+
+      - name: Upload artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: build-release
+          path: |
+            build\bin\x64\Release\localify.*
+            loader\build\bin\x64\Release\loader.*
